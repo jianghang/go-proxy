@@ -102,3 +102,4 @@ fabric.properties
 .nfs*
 
 .idea
+/http_proxy.log

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -18,8 +19,16 @@ func init() {
 	flag.StringVar(&destIP, "destIP", "183.250.160.154", "bind IP")
 }
 
+func customReadSocket(conn net.Conn, c chan<- []byte, isDone chan bool) {
+	reader := bufio.NewReader(conn)
+
+	for {
+		reader.ReadString('\n')
+	}
+}
+
 // readSocket reads data from socket if available and passes it to channel
-func readSocket(conn net.Conn, c chan<- []byte, isDone chan bool) {
+func readSocket(conn net.Conn, c chan<- []byte, isDone chan<- bool) {
 
 	// Create a buffer to hold data
 	buf := make([]byte, 2048)
@@ -47,12 +56,12 @@ func readSocket(conn net.Conn, c chan<- []byte, isDone chan bool) {
 		// n is the number of bytes read from the connection
 		fmt.Printf("Received from %v: %s\n", rAddr, buf[:n])
 		// Send data to channel
-		c <- buf[:n]
+		c <- []byte(string(buf[:n]))
 	}
 }
 
 // writeSocket reads data from channel and writes it to socket
-func writeSocket(conn net.Conn, c <-chan []byte, isDone chan bool) {
+func writeSocket(conn net.Conn, c <-chan []byte, isDone chan<- bool) {
 
 	// Create a buffer to hold data
 	buf := make([]byte, 2048)
